@@ -4,17 +4,10 @@ public class GameField {
 
     static final int rowCount = 10;
     static final int columnCount = 10;
+    static final int shipCount = 5;
 
     private final Cell[][] field = new Cell[rowCount][columnCount];
-    private final Ship[][] fieldWithShips = new Ship[rowCount][columnCount];
-
-    private final Ship[] ships = {
-            new AircraftCarrier(),
-            new Battleship(),
-            new Submarine(),
-            new Cruiser(),
-            new Destroyer()
-    };
+    private final Fleet[] fleet = new Fleet[shipCount];
 
     public GameField() {
         fillField();
@@ -56,15 +49,19 @@ public class GameField {
 
     public boolean allShipsSunk() {
         boolean result = true;
-        for (Ship ship : ships) {
+        for (Fleet ship : fleet) {
             result = result && ship.isKilled();
         }
         return result;
     }
 
     public void arrangeShips() {
-        for (Ship ship : ships) {
+        int index = 0;
+        for (Fleet ship : Fleet.values()) {
+            fleet[index++] = ship;
+
             System.out.printf("Enter the coordinates of the %s:%n", ship.getFullName());
+
             while (true) {
                 try {
                     ship.build();
@@ -78,9 +75,9 @@ public class GameField {
         }
     }
 
-    private void placeShip(Ship ship) {
-        for (Ship currentShip : ships) {
-            if (currentShip == ship || currentShip.begin == null) {
+    private void placeShip(Fleet ship) {
+        for (Fleet currentShip : fleet) {
+            if (currentShip == ship || currentShip == null) {
                 continue;
             }
             if (ship.isIntersected(currentShip.begin, currentShip.end)) {
@@ -100,8 +97,7 @@ public class GameField {
 
         for (int i = beginY; i <= endY; ++i) {
             for (int j = beginX; j <= endX; ++j) {
-                field[i][j] = Cell.SHIP;
-                fieldWithShips[i][j] = ship;
+                field[i][j] = new Ship(ship);
             }
         }
     }
@@ -109,21 +105,17 @@ public class GameField {
     public Cell takeShot(Point point) {
         if (point.x >= columnCount || point.y >= rowCount) {
             System.out.println("Error! You entered the wrong coordinates! Try again:");
-            return Cell.FOG;
+            return null;
         }
 
         Cell cell = field[point.y][point.x];
-        Ship ship = fieldWithShips[point.y][point.x];
         String message;
 
-        if (cell == Cell.SHIP || cell == Cell.HIT) {
-            cell = Cell.HIT;
+        if (cell.isHit()) {
+            Fleet ship = cell.getShip();
             ship.hitCount += 1;
-            if (ship.isKilled()) {
-                message = "You sank a ship!";
-            } else {
-                message = "You hit a ship!";
-            }
+            message = ship.isKilled() ? "You sank a ship!" : "You hit a ship!";
+            cell = Cell.HIT;
         } else {
             message = "You missed!";
             cell = Cell.MISS;
@@ -132,7 +124,6 @@ public class GameField {
         field[point.y][point.x] = cell;
 
         System.out.println(message);
-        //print();
 
         return cell;
     }

@@ -1,12 +1,30 @@
 package battleship;
 
-class Ship {
+enum Fleet {
+    AIRCRAFT("Aircraft Carrier", 5),
+    BATTLESHIP("Battleship", 4),
+    SUBMARINE("Submarine", 3),
+    CRUISER("Cruiser", 3),
+    DESTROYER("Destroyer", 2);
 
-    protected String name;
-    protected int size;
-    protected Point begin;
-    protected Point end;
-    protected int hitCount = 0;
+    String name;
+    int size;
+    Point begin;
+    Point end;
+    int hitCount;
+
+    Fleet(String name, int size) {
+        this.name = name;
+        this.size = size;
+    }
+
+    Point getBegin() {
+        return begin;
+    }
+
+    Point getEnd() {
+        return end;
+    }
 
     public boolean isKilled() {
         return hitCount >= size;
@@ -35,20 +53,20 @@ class Ship {
         }
     }
 
-    public boolean isTooClose(Ship otherShip) {
+    public boolean isTooClose(Fleet otherShip) {
         boolean result = false;
 
         for (int shift : new int[]{-1, 1}) {
-            Point begin = new Point(otherShip.begin.x, otherShip.begin.y);
-            Point end = new Point(otherShip.end.x, otherShip.end.y);
+            Point begin = new Point(otherShip.getBegin().x, otherShip.getBegin().y);
+            Point end = new Point(otherShip.getEnd().x, otherShip.getEnd().y);
             begin.x += shift;
             end.x += shift;
             result = result || isIntersected(begin, end);
         }
 
         for (int shift : new int[]{-1, 1}) {
-            Point begin = new Point(otherShip.begin.x, otherShip.begin.y);
-            Point end = new Point(otherShip.end.x, otherShip.end.y);
+            Point begin = new Point(otherShip.getBegin().x, otherShip.getBegin().y);
+            Point end = new Point(otherShip.getEnd().x, otherShip.getEnd().y);
             begin.y += shift;
             end.y += shift;
             result = result || isIntersected(begin, end);
@@ -69,11 +87,11 @@ class Ship {
                 && area(c,d,a) * area(c,d,b) <= 0;
     }
 
-    private int area (Point a, Point b, Point c) {
+    private int area(Point a, Point b, Point c) {
         return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
     }
 
-    private boolean intersect (int a, int b, int c, int d) {
+    private boolean intersect(int a, int b, int c, int d) {
         if (a > b) {
             int k = a;
             a = b;
@@ -85,45 +103,5 @@ class Ship {
             d = k;
         }
         return Math.max(a,c) <= Math.min(b,d);
-    }
-}
-
-class AircraftCarrier extends Ship {
-
-    AircraftCarrier() {
-        this.name = "Aircraft Carrier";
-        this.size = 5;
-    }
-}
-
-class Battleship extends Ship {
-
-    Battleship() {
-        this.name = "Battleship";
-        this.size = 4;
-    }
-}
-
-class Submarine extends Ship {
-
-    Submarine() {
-        this.name = "Submarine";
-        this.size = 3;
-    }
-}
-
-class Cruiser extends Ship {
-
-    Cruiser() {
-        this.name = "Cruiser";
-        this.size = 3;
-    }
-}
-
-class Destroyer extends Ship {
-
-    Destroyer() {
-        this.name = "Destroyer";
-        this.size = 2;
     }
 }
